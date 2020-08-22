@@ -93,21 +93,7 @@ public class synesthesiaScript : MonoBehaviour {
 			Submit.AddInteractionPunch();
 			if (!solved && !playing)
 			{
-				bool safe = true;
-				for (int i = 0; i < 16; i++)
-				{
-					if(Value[i] != Solution[i])
-                    {
-						safe = false;
-                    }
-				}
-				if (safe)
-				{
-					StartCoroutine(Finish());
-					solved = true;
-				}
-				else
-					Module.HandleStrike();
+				StartCoroutine(Finish());
 			}
 			return false;
 		};
@@ -140,7 +126,8 @@ public class synesthesiaScript : MonoBehaviour {
 			Solution[i] = Rnd.Range(0, 27);
 			//Button[i].GetComponent<MeshRenderer>().material.color = new Color((Solution[i] / 9) / 2f, ((Solution[i] / 3) % 3) / 2f, (Solution[i] % 3) / 2f);
 		}
-		Debug.LogFormat("[Synesthesia #{0}] The sequence played is {1}.", _moduleID, Solution.Join(", "));
+		string[] colours = { "000", "001", "002", "010", "011", "012", "020", "021", "022", "100", "101", "102", "110", "111", "112", "120", "121", "122", "200", "201", "202", "210", "211", "212", "220", "221", "222" };
+		Debug.LogFormat("[Synesthesia #{0}] The sequence played is {1}.", _moduleID, Solution.Select(x => colours[x]).ToArray().Join(", "));
 	}
 
 	private IEnumerator Play()
@@ -170,19 +157,60 @@ public class synesthesiaScript : MonoBehaviour {
 	}
 	private IEnumerator Finish()
 	{
-		Submit.GetComponent<MeshRenderer>().material.color = new Color(0f, 1f, 0f);
-		int[] r = { 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1 };
+		bool safe = true;
 		for (int i = 0; i < 16; i++)
 		{
-			Button[i].GetComponent<MeshRenderer>().material.color = new Color(r[i], r[i], r[i]);
+			if (Value[i] != Solution[i])
+			{
+				Button[i].GetComponent<MeshRenderer>().material.color = new Color(1f, 0f, 0f);
+				Audio.PlaySoundAtTransform("a2", Module.transform);
+				safe = false;
+			}
+            else
+            {
+				Button[i].GetComponent<MeshRenderer>().material.color = new Color(0f, 1f, 0f);
+				Audio.PlaySoundAtTransform("b2", Module.transform);
+			}
 			yield return new WaitForSeconds(0.1f);
 		}
-		Playbutton.GetComponent<MeshRenderer>().material.color = new Color(0f, 1f, 0f);
-		for (int i = 0; i < 9; i++)
+		if (safe)
 		{
-			Selection[i].GetComponent<MeshRenderer>().material.color = new Color(0f, 1f, 0f);
+			solved = true;
+			string[] sounds = { "a", "b", "c", "a2", "b2", "c2", "a3" };
+			int[] r = { 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1 };
+			for (int i = 0; i < 16; i++)
+			{
+				Button[i].GetComponent<MeshRenderer>().material.color = new Color(r[i], r[i], r[i]);
+				yield return new WaitForSeconds(0.1f);
+			}
+			for (int i = 0; i < 6; i++)
+			{
+				Audio.PlaySoundAtTransform(sounds[i], Module.transform);
+				yield return new WaitForSeconds(0.2f);
+			}
+			for (int i = 0; i < 3; i++)
+			{
+				Audio.PlaySoundAtTransform(sounds[i * 3], Module.transform);
+			}
+			Playbutton.GetComponent<MeshRenderer>().material.color = new Color(0f, 1f, 0f);
+			for (int i = 0; i < 9; i++)
+			{
+				Selection[i].GetComponent<MeshRenderer>().material.color = new Color(0f, 1f, 0f);
+			}
+			Submit.GetComponent<MeshRenderer>().material.color = new Color(0f, 1f, 0f);
+			Module.HandlePass();
 		}
-		Module.HandlePass();
+		else
+		{
+			Module.HandleStrike();
+			for (int i = 0; i < 16; i++)
+			{
+				Button[i].GetComponent<MeshRenderer>().material.color = new Color((Value[i] / 9) / 2f, ((Value[i] / 3) % 3) / 2f, (Value[i] % 3) / 2f);
+				yield return new WaitForSeconds(0.1f);
+			}
+			string[] colours = { "000", "001", "002", "010", "011", "012", "020", "021", "022", "100", "101", "102", "110", "111", "112", "120", "121", "122", "200", "201", "202", "210", "211", "212", "220", "221", "222" };
+			Debug.LogFormat("[Synesthesia #{0}] You submitted {1}, but I expected {2}.", _moduleID, Value.Select(x => colours[x]).ToArray().Join(", "), Solution.Select(x => colours[x]).ToArray().Join(", "));
+		}
 	}
 #pragma warning disable 414
 	private string TwitchHelpMessage = "'!{0} play' to play the sequence. '!{0} submit' to submit the image. '!{0} 201' to select RGB values R=2 G=0 B=1, '!{0} A3' to press A3. Commands can be chained. e.g. '!{0} 120 A2 201 B4 B3'";
@@ -192,7 +220,7 @@ public class synesthesiaScript : MonoBehaviour {
 		yield return null;
 		command = command.ToLowerInvariant();
 		if (command == "play") { Playbutton.OnInteract(); }
-		else if (command == "submit") { Submit.OnInteract(); yield return "solve"; }
+		else if (command == "submit") { Submit.OnInteract(); yield return "strike"; yield return "solve"; }
 		else
 		{
 			string[] cmds = command.Split(' ');

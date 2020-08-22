@@ -25,6 +25,6 @@ MonoBehaviour:
     TP included.
 
     Warning: Colordeaf support will not be included!'
-  version: 1.0
+  version: 1.2
   outputFolder: build
   previewImage: {fileID: 2800000, guid: 3a4ceb0ac2c924c4ab7ac17090d3be7a, type: 3}
