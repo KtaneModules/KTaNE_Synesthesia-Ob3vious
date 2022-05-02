@@ -28,6 +28,6 @@ MonoBehaviour:
 
 
     Now includes a cruel variant'
-  version: 2
+  version: 2.1
   outputFolder: build
   previewImage: {fileID: 2800000, guid: f1564ff15fbc34c48a45ce7de0ba0f17, type: 3}

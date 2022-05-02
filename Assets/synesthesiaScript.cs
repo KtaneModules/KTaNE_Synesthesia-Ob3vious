@@ -265,17 +265,16 @@ public class synesthesiaScript : MonoBehaviour {
 	}
 	IEnumerator TwitchHandleForcedSolve()
 	{
-		yield return true;
 		for (int i = 0; i < 16; i++)
 		{
 			Selection[Solution[i] / 9].OnInteract();
-			yield return true;
+			yield return new WaitForSeconds(0.1f);
 			Selection[(Solution[i] / 3) % 3 + 3].OnInteract();
-			yield return true;
+			yield return new WaitForSeconds(0.1f);
 			Selection[Solution[i] % 3 + 6].OnInteract();
-			yield return true;
+			yield return new WaitForSeconds(0.1f);
 			Button[i].OnInteract();
-			yield return true;
+			yield return new WaitForSeconds(0.1f);
 		}
 		Submit.OnInteract();
 	}

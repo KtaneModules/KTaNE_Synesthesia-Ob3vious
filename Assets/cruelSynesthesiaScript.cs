@@ -335,17 +335,16 @@ public class cruelSynesthesiaScript : MonoBehaviour {
 
 	IEnumerator TwitchHandleForcedSolve()
 	{
-		yield return true;
 		for (int i = 0; i < 16; i++)
 		{
 			Selection[Solution[i] / 16].OnInteract();
-			yield return true;
+			yield return new WaitForSeconds(0.1f);
 			Selection[(Solution[i] / 4) % 4 + 4].OnInteract();
-			yield return true;
+			yield return new WaitForSeconds(0.1f);
 			Selection[Solution[i] % 4 + 8].OnInteract();
-			yield return true;
+			yield return new WaitForSeconds(0.1f);
 			Button[i].OnInteract();
-			yield return true;
+			yield return new WaitForSeconds(0.1f);
 		}
 		Utility[1].OnInteract();
 	}
